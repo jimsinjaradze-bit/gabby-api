@@ -1,5 +1,5 @@
 # Build stage
-FROM eclipse-temurin:17-jdk AS build
+FROM eclipse-temurin:25-jdk AS build
 WORKDIR /app
 
 COPY .mvn .mvn
@@ -10,7 +10,7 @@ COPY src src
 RUN ./mvnw package -DskipTests -B
 
 # Runtime stage
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:25-jre
 WORKDIR /app
 
 COPY --from=build /app/target/gabby-*.jar app.jar
