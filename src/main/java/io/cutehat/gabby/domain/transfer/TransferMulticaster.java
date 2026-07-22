@@ -36,6 +36,15 @@ public class TransferMulticaster {
         }
     }
 
+    public void updateParticipant(String participant){
+        try {
+            messenger.send(participant, new ServerMessage(ServerMessageType.TRANSFER_LIST, prepareTransfersFor(participant)));
+        } catch (IOException e) {
+            log.error("Could not send transfer list", e);
+            throw new RuntimeException(e);
+        }
+    }
+
     private @NonNull List<TransferDTO> prepareTransfersFor(String transfer) {
         return transferService.getAllByParticipant(transfer)
                 .stream().map(TransferDTO::from)

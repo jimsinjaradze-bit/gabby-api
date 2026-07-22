@@ -1,4 +1,4 @@
-package io.cutehat.gabby.domain.transfer.config;
+package io.cutehat.gabby.domain.policy.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

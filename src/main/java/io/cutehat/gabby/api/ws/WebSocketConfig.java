@@ -1,5 +1,6 @@
 package io.cutehat.gabby.api.ws;
 
+import io.cutehat.gabby.domain.policy.config.TransferPolicyProperties;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,9 +25,11 @@ import java.util.Enumeration;
 public class WebSocketConfig implements WebSocketConfigurer {
     private static final String EXTENSIONS_HEADER = "Sec-WebSocket-Extensions";
 
+    private final TransferPolicyProperties transferPolicyProperties;
     private final GabbyWebSocketHandler gabbyHandler;
 
-    public WebSocketConfig(GabbyWebSocketHandler gabbyHandler) {
+    public WebSocketConfig(TransferPolicyProperties transferPolicyProperties, GabbyWebSocketHandler gabbyHandler) {
+        this.transferPolicyProperties = transferPolicyProperties;
         this.gabbyHandler = gabbyHandler;
     }
 
@@ -39,7 +42,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Bean
     public ServletServerContainerFactoryBean createWebSocketContainer() {
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-        container.setMaxBinaryMessageBufferSize(65536);
+        container.setMaxBinaryMessageBufferSize(transferPolicyProperties.maxChunkSizeInBytes());
         return container;
     }
 

@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TransferRepository {
     private static final Logger log = LoggerFactory.getLogger(TransferRepository.class);
 
-    private final int MAX_CAPACITY = 16;
+    private final int MAX_CAPACITY = 64;
     private final Map<String, TransferEntity> transfers = new ConcurrentHashMap<>(MAX_CAPACITY, 1f);
 
     public TransferEntity createRequest(String from, String to, FileMeta fileMeta, int validForSeconds) {
@@ -63,6 +63,9 @@ public class TransferRepository {
                 .toList();
     }
 
+    public void removeAll(List<TransferEntity> toRemove) {
+        toRemove.forEach(entity -> transfers.remove(entity.getId()));
+    }
 
     public boolean existsByParticipantAndStatus(String participant,
                                                 TransferStatus status) {

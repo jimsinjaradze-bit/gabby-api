@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 public class NodeRepository {
-    private final Integer MAX_CAPACITY = 4;
+    private final Integer MAX_CAPACITY = 16;
     private final Map<String, Node> nodes = new ConcurrentHashMap<>(MAX_CAPACITY, 1f);
 
     public void register(String name, WebSocketSession session) {

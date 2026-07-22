@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -17,12 +17,13 @@ import java.util.stream.Collectors;
 public class TextCommandDispatchService {
     private static final Logger log = LoggerFactory.getLogger(TextCommandDispatchService.class);
 
-    private final Map<ClientCommandType, ClientCommandHandler> handlers;
+    private final Map<ClientCommandType, List<ClientCommandHandler>> handlers;
     private final ObjectMapper objectMapper;
 
-    public TextCommandDispatchService(List<ClientCommandHandler> handlers, ObjectMapper objectMapper) {
+    public TextCommandDispatchService(List<ClientCommandHandler> handlers,
+                                      ObjectMapper objectMapper) {
         this.handlers = handlers.stream()
-                .collect(Collectors.toMap(ClientCommandHandler::type, Function.identity()));
+                .collect(Collectors.groupingBy(ClientCommandHandler::type));
         this.objectMapper = objectMapper;
     }
 
@@ -31,12 +32,15 @@ public class TextCommandDispatchService {
     }
 
     public void dispatch(CommandContext ctx, ClientCommand command) {
-        ClientCommandHandler handler = handlers.get(command.clientCommandType());
-        if (handler == null) {
+        List<ClientCommandHandler> matched = handlers.get(command.clientCommandType());
+        if (matched == null || matched.isEmpty()) {
             throw new IllegalArgumentException("No handler for command: " + command.clientCommandType());
         }
 
         log.debug("Dispatching {} from {}", command.clientCommandType(), ctx.senderName());
-        handler.handle(ctx, command);
+        matched
+                .stream()
+                .sorted(Comparator.comparing(ClientCommandHandler::order))
+                .forEach(handler -> handler.handle(ctx, command));
     }
 }

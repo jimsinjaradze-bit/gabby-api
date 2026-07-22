@@ -16,10 +16,12 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import tools.jackson.databind.ObjectMapper;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -86,70 +88,31 @@ class PayloadRelayIntegrationTest {
         awaitUntilTransferHasStatus(handlerForBob, transferId, TransferStatus.COMPLETED_SUCCESSFULLY, TIMEOUT_MS);
     }
 
-    public void awaitUntilAllBytesReceived(ServerResponseHandler handler, int expectedBytes, long timeout) {
-        long deadline = System.currentTimeMillis() + timeout;
-
-        while (System.currentTimeMillis() < deadline) {
-            if (handler.getBytesReceived() == expectedBytes) {
-                return;
-            }
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        throw new AssertionError("expected " + expectedBytes + " bytes but received " + handler.getBytesReceived());
+    public void awaitUntilAllBytesReceived(ServerResponseHandler handler, int expectedBytes, long timeoutMs) {
+        await().atMost(Duration.ofMillis(timeoutMs))
+                .pollInterval(Duration.ofMillis(20))
+                .until(() -> handler.getBytesReceived() == expectedBytes);
     }
 
-    public String awaitUntilTransferArrives(ServerResponseHandler handler, long timeout) {
-        long deadline = System.currentTimeMillis() + timeout;
-
-        while (System.currentTimeMillis() < deadline) {
-            if (!handler.getTransfers().isEmpty()) {
-                return handler.getTransfers().get(0).id();
-            }
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        throw new AssertionError("transfer request did not arrive");
+    public String awaitUntilTransferArrives(ServerResponseHandler handler, long timeoutMs) {
+        await().atMost(Duration.ofMillis(timeoutMs))
+                .pollInterval(Duration.ofMillis(20))
+                .until(() -> !handler.getTransfers().isEmpty());
+        return handler.getTransfers().get(0).id();
     }
 
-    public void awaitUntilTransferHasStatus(ServerResponseHandler handler, String transferId, TransferStatus status, long timeout) {
-        long deadline = System.currentTimeMillis() + timeout;
-
-        while (System.currentTimeMillis() < deadline) {
-            boolean matches = handler.getTransfers().stream()
-                    .anyMatch(transfer -> transfer.id().equals(transferId) && transfer.status() == status);
-            if (matches) {
-                return;
-            }
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        throw new AssertionError("transfer " + transferId + " did not reach status " + status);
+    public void awaitUntilTransferHasStatus(ServerResponseHandler handler, String transferId, TransferStatus status, long timeoutMs)
+    {
+        await().atMost(Duration.ofMillis(timeoutMs))
+                .pollInterval(Duration.ofMillis(20))
+                .until(() -> handler.getTransfers().stream()
+                        .anyMatch(t -> t.id().equals(transferId) && t.status() == status));
     }
 
-    public void awaitUntilNodesAreConnected(ServerResponseHandler handler, long timeout) {
-        long deadline = System.currentTimeMillis() + timeout;
-
-        while (System.currentTimeMillis() < deadline) {
-            if (handler.getConnectedNodes().size() == 2){
-                return;
-            }
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        throw new AssertionError("nodes did not connect");
+    public void awaitUntilNodesAreConnected(ServerResponseHandler handler, long timeoutMs) {
+        await().atMost(Duration.ofMillis(timeoutMs))
+                .pollInterval(Duration.ofMillis(20))
+                .until(() -> handler.getConnectedNodes().size() == 2);
     }
 
     private String wsUri(String name) {

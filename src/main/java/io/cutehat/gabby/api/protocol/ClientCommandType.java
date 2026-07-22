@@ -6,5 +6,5 @@ public enum ClientCommandType {
     SEND_PAYLOAD_REQ,
     ACCEPT_PAYLOAD_REQ,
     REJECT_PAYLOAD_REQ,
-//    SEND_PAYLOAD;
+    GET_POLICY;
 }

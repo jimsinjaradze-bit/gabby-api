@@ -2,7 +2,7 @@ package io.cutehat.gabby.domain.transfer;
 
 import io.cutehat.gabby.api.protocol.payload.FileMeta;
 import io.cutehat.gabby.domain.discovery.NodeRepository;
-import io.cutehat.gabby.domain.transfer.config.TransferPolicyProperties;
+import io.cutehat.gabby.domain.policy.config.TransferPolicyProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeType;
 
@@ -23,6 +23,12 @@ public class TransferService {
 
     public List<TransferEntity> getAllByParticipant(String participant) {
         return transferRepository.getAllByParticipant(participant);
+    }
+
+    public List<TransferEntity> cleanForParticipant(String participant) {
+        List<TransferEntity> allByParticipant = getAllByParticipant(participant);
+        transferRepository.removeAll(allByParticipant);
+        return allByParticipant;
     }
 
     public TransferEntity get(String id) {

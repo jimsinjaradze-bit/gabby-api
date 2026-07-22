@@ -7,4 +7,8 @@ public interface ClientCommandHandler {
     ClientCommandType type();
 
     void handle(CommandContext ctx, ClientCommand cmd);
+
+    default int order() {
+        return 1;
+    }
 }

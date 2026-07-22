@@ -1,6 +1,6 @@
 package io.cutehat.gabby.domain.discovery;
 
-import io.cutehat.gabby.domain.transfer.config.TransferPolicyProperties;
+import io.cutehat.gabby.domain.policy.config.TransferPolicyProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
